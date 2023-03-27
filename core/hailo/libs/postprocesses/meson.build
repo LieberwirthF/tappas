@@ -37,19 +37,18 @@ shared_library('yolo_hailortpp_post',
 ################################################
 # FACE DETECTION SOURCES
 ################################################
-face_detection_post_sources = [
-    'detection/face_detection.cpp',
-]
+#face_detection_post_sources = [
+#    'detection/face_detection.cpp',
+#]
 
-shared_library('face_detection_post',
-    face_detection_post_sources,
-    cpp_args : hailo_lib_args,
-    include_directories: [hailo_general_inc, include_directories('./'), rapidjson_inc] + xtensor_inc,
-    dependencies : post_deps,
-    gnu_symbol_visibility : 'default',
-    install: true,
-    install_dir: post_proc_install_dir,
-)
+#shared_library('face_detection_post',
+#    face_detection_post_sources,
+#    cpp_args : hailo_lib_args,
+#    include_directories: [hailo_general_inc, include_directories('./'), rapidjson_inc] + xtensor_inc,
+#    dependencies : post_deps,
+#    gnu_symbol_visibility : 'default',
+#    install: true,
+#    install_dir: post_proc_install_dir,
 
 ################################################
 # SCRFD DETECTION SOURCES
@@ -77,6 +76,23 @@ nanodet_post_sources = [
 
 shared_library('nanodet_post',
     nanodet_post_sources,
+    cpp_args : hailo_lib_args,
+    include_directories: [hailo_general_inc, include_directories('./')] + xtensor_inc,
+    dependencies : post_deps,
+    gnu_symbol_visibility : 'default',
+    install: true,
+    install_dir: post_proc_install_dir,
+)
+
+################################################
+# CENTERNET DETECTION SOURCES
+################################################
+centernet_post_sources = [
+    'detection/centerpp.cpp',
+]
+
+shared_library('centernet_post',
+    centernet_post_sources,
     cpp_args : hailo_lib_args,
     include_directories: [hailo_general_inc, include_directories('./')] + xtensor_inc,
     dependencies : post_deps,
