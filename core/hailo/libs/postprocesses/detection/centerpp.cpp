@@ -2,7 +2,8 @@
 /**
 * Copyright (c) 2021-2022 Hailo Technologies Ltd. All rights reserved.
 * Distributed under the LGPL license (https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
+*
+* created by Fridtjof Lieberwirth (lieberwirth@dresearch-fe.de)
 **/
 
 #include <cmath>
@@ -142,6 +143,7 @@ xt::xarray<float> build_boxes_centernet(xt::xarray<float> &scores,
  * @param keypoints keypoints
  * @param score_threshold threshold for score filtering
  * @param max_detections max number of best results
+ * @param labels map with label_id and label name
  * @param image_size image width/height (the netowork input tensor is square)
  */
 void encode_boxes_centernet(std::vector<HailoDetection> &objects,
@@ -150,11 +152,13 @@ void encode_boxes_centernet(std::vector<HailoDetection> &objects,
                             xt::xarray<float> &center_wh,
                             const float score_threshold,
                             const int max_detections,
+                            std::map<std::uint8_t, std::string> labels,
                             const int image_size)
 {
     // The detection meta will hold the following items:
     float confidence, w, h, xmin, ymin = 0.0f;
-    std::string label = "person";
+    // label_id hardcoded since it's not clear where the labl_id can be extracted from the tensor
+    std::uint8_t label_id = 0;
     xt::xarray<float> wh_scaled = center_wh / image_size;
     // Iterate over our top k results
     for (int index = 0; index < max_detections; index++)
@@ -172,7 +176,7 @@ void encode_boxes_centernet(std::vector<HailoDetection> &objects,
 
         // Once all parameters are calculated, push them into the meta
         // Class = 1 since centernet only detects people
-        HailoDetection detection(HailoBBox(xmin, ymin, w, h), -1, label, confidence);
+        HailoDetection detection(HailoBBox(xmin, ymin, w, h), label_id, labels[label_id], confidence);
 
         objects.emplace_back(std::move(detection)); // Push the detection to the objects vector
     }
@@ -234,6 +238,7 @@ std::vector<HailoDetection> centernet_postprocess(HailoROIPtr roi,
                            topk_center_wh_rescaled,
                            params->detection_threshold,
                            params->max_boxes,
+                           params->labels,
                            image_size);
 
     // Perform nms to throw out similar detections
