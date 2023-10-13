@@ -18,7 +18,7 @@
 #include "common/tensors.hpp"
 #include "common/math.hpp"
 #include "common/nms.hpp"
-#include "common/json_config.hpp"
+#include "json_config.hpp"
 
 #include "xtensor/xadapt.hpp"
 #include "xtensor/xarray.hpp"
