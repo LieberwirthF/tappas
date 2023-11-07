@@ -187,7 +187,9 @@ gst_hailoexportfile_transform_ip(GstBaseTransform *trans,
     encoded_roi.AddMember("timestamp (ms)", rapidjson::Value(timenow), encoded_roi.GetAllocator());
     // Add a pts
     GstClockTime pts = GST_BUFFER_PTS(buffer);
+    GstClockTime dts = GST_BUFFER_DTS(buffer);
     encoded_roi.AddMember("pts (ns)", rapidjson::Value(pts), encoded_roi.GetAllocator());
+    encoded_roi.AddMember("dts (ns)", rapidjson::Value(dts), encoded_roi.GetAllocator());
     encoded_roi.AddMember("buffer_offset", rapidjson::Value(hailoexportfile->buffer_offset), encoded_roi.GetAllocator());
 
     // Add the stream-id
