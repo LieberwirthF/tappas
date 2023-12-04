@@ -25,7 +25,7 @@ static std::map<uint8_t, std::string> yolo_vehicles_labels = {
 
 void yolov5(HailoROIPtr roi, void *params_void_ptr)
 {
-    YoloParams *params = reinterpret_cast<YoloParams *>(params_void_ptr);
+    YoloV7Params *params = reinterpret_cast<YoloV7Params *>(params_void_ptr);
 
     auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV5M_OUTPUT_LAYER), params->labels);
     auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
@@ -67,29 +67,61 @@ void yolov5_no_persons(HailoROIPtr roi)
 
 void filter(HailoROIPtr roi, void *params_void_ptr)
 {
-    yolov5(roi, params_void_ptr);
+    YoloV7Params *params = reinterpret_cast<YoloV7Params *>(params_void_ptr);
+    yolov5(roi, params);
 }
 
-YoloParams *init(const std::string config_path, const std::string function_name)
+YoloV7Params *init(const std::string config_path, const std::string function_name)
 {
-    YoloParams *params;
+    YoloV7Params *params;
     if (!fs::exists(config_path))
     {
-        std::cerr << "Please pass a config." << std::endl;
+        std::ostringstream oss;
+        oss << "No config found" << std::endl;
+
+        throw std::runtime_error(oss.str());
         return params;
     }
     else
     {
-        params = new YoloParams;
+        params = new YoloV7Params;
         char config_buffer[4096];
         const char *json_schema = R""""({
         "$schema": "http://json-schema.org/draft-04/schema#",
         "type": "object",
         "properties": {
-            "labels": {
+            "iou_threshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+            },
+            "detection_threshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+            },
+            "output_activation": {
+            "type": "string"
+            },
+            "label_offset": {
+            "type": "integer"
+            },
+            "max_boxes": {
+            "type": "integer"
+            },
+            "anchors": {
+            "type": "array",
+            "items": {
                 "type": "array",
                 "items": {
-                    "type": "string"
+                "type": "integer"
+                }
+            }
+            },
+            "labels": {
+            "type": "array",
+            "items": {
+                "type": "string"
                 }
             }
         },
@@ -118,21 +150,52 @@ YoloParams *init(const std::string config_path, const std::string function_name)
                 params->labels.insert(std::pair<std::uint8_t, std::string>(i, v.GetString()));
                 i++;
             }
-            // set the params
+            // parse anchors
+            // auto config_anchors = doc_config_json["anchors"].GetArray();
+            // std::vector<std::vector<int>> anchors_vec;
+            // for (uint j = 0; j < config_anchors.Size(); j++)
+            // {
+            //     uint size = config_anchors[j].GetArray().Size();
+            //     std::vector<int> anchor;
+            //     for (uint k = 0; k < size; k++)
+            //     {
+            //         anchor.push_back(config_anchors[j].GetArray()[k].GetInt());
+            //     }
+            //     anchors_vec.push_back(anchor);
+            // }
+
+            // params->anchors_vec = anchors_vec;
+            // // set the params
             // params->iou_threshold = doc_config_json["iou_threshold"].GetFloat();
             // params->detection_threshold = doc_config_json["detection_threshold"].GetFloat();
-            // params->hm_layer_name = doc_config_json["hm_layer_name"].GetString();
-            // params->wh_layer_name = doc_config_json["wh_layer_name"].GetString();
-            // params->reg_layer_name = doc_config_json["reg_layer_name"].GetString();
+            // params->output_activation = doc_config_json["output_activation"].GetString();
+            // params->label_offset = doc_config_json["label_offset"].GetInt();
             // params->max_boxes = doc_config_json["max_boxes"].GetInt();
+            // if (params->output_activation != "sigmoid" && params->output_activation != "none")
+            // {
+            //     std::ostringstream oss;
+            //     oss << "config output activation do not match! output activation: "
+            //         << params->output_activation << std::endl;
+            //     throw std::runtime_error(oss.str());
+            // }
         }
         fclose(fp);
     }
     return params;
 }
+// void YoloV7Params::check_params_logic(uint num_classes_tensors)
+// {
+//     if (labels.size() - 1 != num_classes_tensors)
+//     {
+//         std::ostringstream oss;
+//         oss << "config class labels do not match output tensors! config labels size: "
+//             << labels.size() - 1 << " tensors num classes: " << num_classes_tensors << std::endl;
+//         throw std::runtime_error(oss.str());
+//     }
+// }
 
 void free_resources(void *params_void_ptr)
 {
-    YoloParams *params = reinterpret_cast<YoloParams *>(params_void_ptr);
+    YoloV7Params *params = reinterpret_cast<YoloV7Params *>(params_void_ptr);
     delete params;
 }

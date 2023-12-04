@@ -9,24 +9,26 @@
 
 __BEGIN_DECLS
 
-class YoloParams
+class YoloV7Params
 {
 public:
-    // float detection_threshold;
     // float iou_threshold;
+    // float detection_threshold;
     std::map<std::uint8_t, std::string> labels;
     // uint num_classes;
     // uint max_boxes;
-    // std::string hm_layer_name;
-    // std::string wh_layer_name;
-    // std::string reg_layer_name;
+    // std::vector<std::vector<int>> anchors_vec;
+    // std::string output_activation; // can be "none" or "sigmoid"
+    // int label_offset;
+    // YoloV7Params() : iou_threshold(0.45f), detection_threshold(0.3f), output_activation("none"), label_offset(1) {}
+    // void check_params_logic(uint num_classes_tensors);
 };
 
-YoloParams *init(std::string config_path, std::string func_name);
+YoloV7Params *init(std::string config_path, std::string func_name);
 void free_resources(void *params_void_ptr);
 
-void filter(HailoROIPtr roi);
-void yolov5(HailoROIPtr roi);
+void filter(HailoROIPtr roi, void *params_void_ptr);
+void yolov5(HailoROIPtr roi, void *params_void_ptr);
 void yolox(HailoROIPtr roi);
 void yolov5_no_persons(HailoROIPtr roi);
 void yolov5m_vehicles(HailoROIPtr roi);
