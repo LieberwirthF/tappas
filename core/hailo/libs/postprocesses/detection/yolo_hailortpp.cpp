@@ -1,12 +1,21 @@
 #include "hailo_nms_decode.hpp"
 #include "yolo_hailortpp.hpp"
 #include "common/labels/coco_eighty.hpp"
+#include "json_config.hpp"
 
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/error/en.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/schema.h"
+
+#if __GNUC__ > 8
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
 
 static const std::string DEFAULT_YOLOV5M_OUTPUT_LAYER = "yolov5_nms_postprocess";
 
@@ -56,7 +65,7 @@ void yolov5_no_persons(HailoROIPtr roi)
     hailo_common::add_detections(roi, detections);
 }
 
-void filter(HailoROIPtr roi, oid *params_void_ptr)
+void filter(HailoROIPtr roi, void *params_void_ptr)
 {
     yolov5(roi, params_void_ptr);
 }
