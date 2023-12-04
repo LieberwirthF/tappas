@@ -107,7 +107,7 @@ static std::map<uint8_t, std::string> yolo_vehicles_labels = {
     {0, "unlabeled"},
     {1, "car"}};
 
-void yolov5(HailoROIPtr roi)
+void yolov5(HailoROIPtr roi, void *params_void_ptr)
 {
     if (!roi->has_tensors())
     {
