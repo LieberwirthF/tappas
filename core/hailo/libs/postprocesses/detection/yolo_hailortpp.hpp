@@ -8,6 +8,23 @@
 
 
 __BEGIN_DECLS
+
+class YoloParams
+{
+public:
+    // float detection_threshold;
+    // float iou_threshold;
+    std::map<std::uint8_t, std::string> labels;
+    // uint num_classes;
+    // uint max_boxes;
+    // std::string hm_layer_name;
+    // std::string wh_layer_name;
+    // std::string reg_layer_name;
+};
+
+YoloParams *init(std::string config_path, std::string func_name);
+void free_resources(void *params_void_ptr);
+
 void filter(HailoROIPtr roi);
 void yolov5(HailoROIPtr roi);
 void yolox(HailoROIPtr roi);
