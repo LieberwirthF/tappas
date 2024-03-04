@@ -9,8 +9,11 @@
 #include "yolo_hailortpp.hpp"
 #include "common/labels/coco_eighty.hpp"
 
-static const std::string DEFAULT_YOLOV5M_OUTPUT_LAYER = "yolov5_nms_postprocess";
+static const std::string DEFAULT_YOLOV5_OUTPUT_LAYER = "yolov5_nms_postprocess";
+static const std::string DEFAULT_YOLOV5M_OUTPUT_LAYER = "yolov5m_wo_spp_60p/yolov5_nms_postprocess";
 static const std::string DEFAULT_YOLOV7TINY_OUTPUT_LAYER = "yolov7_tiny/yolov5_nms_postprocess";
+static const std::string DEFAULT_YOLOV8S_OUTPUT_LAYER = "yolov8s/yolov8_nms_postprocess";
+static const std::string DEFAULT_YOLOV8M_OUTPUT_LAYER = "yolov8m/yolov8_nms_postprocess";
 
 #if __GNUC__ > 8
 #include <filesystem>
@@ -109,7 +112,44 @@ static std::map<uint8_t, std::string> yolo_vehicles_labels = {
 
 void yolov5(HailoROIPtr roi)
 {
+    if (!roi->has_tensors())
+    {
+        return;
+    }
+    auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV5_OUTPUT_LAYER), common::coco_eighty);
+    auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
+    hailo_common::add_detections(roi, detections);
+}
+
+void yolov5m(HailoROIPtr roi)
+{
+    if (!roi->has_tensors())
+    {
+        return;
+    }
     auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV5M_OUTPUT_LAYER), common::coco_eighty);
+    auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
+    hailo_common::add_detections(roi, detections);
+}
+
+void yolov8s(HailoROIPtr roi)
+{
+    if (!roi->has_tensors())
+    {
+        return;
+    }
+    auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV8S_OUTPUT_LAYER), common::coco_eighty);
+    auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
+    hailo_common::add_detections(roi, detections);
+}
+
+void yolov8m(HailoROIPtr roi)
+{
+    if (!roi->has_tensors())
+    {
+        return;
+    }
+    auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV8M_OUTPUT_LAYER), common::coco_eighty);
     auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
     hailo_common::add_detections(roi, detections);
 }
