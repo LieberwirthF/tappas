@@ -31,6 +31,7 @@ void filter_letterbox(HailoROIPtr roi, void *params_void_ptr);
 void yolov5(HailoROIPtr roi);
 void yolov5s_nv12(HailoROIPtr roi);
 void yolov7tiny(HailoROIPtr roi, void *params_void_ptr);
+void yolov5m(HailoROIPtr roi);
 void yolov8s(HailoROIPtr roi);
 void yolov8m(HailoROIPtr roi);
 void yolox(HailoROIPtr roi);
