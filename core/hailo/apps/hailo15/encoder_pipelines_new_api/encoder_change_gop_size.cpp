@@ -34,9 +34,8 @@ static GstPadProbeReturn encoder_probe_callback(GstPad *pad, GstPadProbeInfo *in
         gpointer value = nullptr;
         g_object_get(G_OBJECT(encoder_element), "user-config", &value, NULL);
         encoder_config_t *config = reinterpret_cast<encoder_config_t *>(value);
-        hailo_encoder_config_t hailo_config = std::get<hailo_encoder_config_t>(*config);
         // Changing to BIG_GOP_SIZE
-        hailo_config.gop.gop_size = BIG_GOP_SIZE;
+        config->gop.gop_size = BIG_GOP_SIZE;
         GST_INFO("Changing encoder to GOP %d", BIG_GOP_SIZE);
         g_object_set(G_OBJECT(encoder_element), "user-config", config, NULL);
     }
@@ -44,9 +43,8 @@ static GstPadProbeReturn encoder_probe_callback(GstPad *pad, GstPadProbeInfo *in
         gpointer value = nullptr;
         g_object_get(G_OBJECT(encoder_element), "user-config", &value, NULL);
         encoder_config_t *config = reinterpret_cast<encoder_config_t *>(value);
-        hailo_encoder_config_t hailo_config = std::get<hailo_encoder_config_t>(*config);
         // Changing to MEDIUM_GOP_SIZE
-        hailo_config.gop.gop_size = MEDIUM_GOP_SIZE;
+        config->gop.gop_size = MEDIUM_GOP_SIZE;
         GST_INFO("Changing encoder to GOP %d", MEDIUM_GOP_SIZE);
         g_object_set(G_OBJECT(encoder_element), "user-config", config, NULL);
     }
@@ -54,9 +52,8 @@ static GstPadProbeReturn encoder_probe_callback(GstPad *pad, GstPadProbeInfo *in
         gpointer value = nullptr;
         g_object_get(G_OBJECT(encoder_element), "user-config", &value, NULL);
         encoder_config_t *config = reinterpret_cast<encoder_config_t *>(value);
-        hailo_encoder_config_t hailo_config = std::get<hailo_encoder_config_t>(*config);
         // Changing to SMALL_GOP_SIZE
-        hailo_config.gop.gop_size = SMALL_GOP_SIZE;
+        config->gop.gop_size = SMALL_GOP_SIZE;
         GST_INFO("Changing encoder to GOP %d", SMALL_GOP_SIZE);
         g_object_set(G_OBJECT(encoder_element), "user-config", config, NULL);
     }
@@ -95,7 +92,7 @@ std::string create_pipeline_string(std::string codec)
                "queue leaky=no max-size-buffers=5 max-size-bytes=0 max-size-time=0 ! "
                "video/x-" + codec + ",framerate=30/1 ! "
                "queue leaky=no max-size-buffers=5 max-size-bytes=0 max-size-time=0 ! "
-               "fpsdisplaysink fps-update-interval=2000 name=display_sink text-overlay=false video-sink=\"filesink location=test."
+               "fpsdisplaysink name=display_sink text-overlay=false video-sink=\"filesink location=test."
                + output_format + " name=hailo_sink\""
                " sync=true signal-fps-measurements=true";
                                            

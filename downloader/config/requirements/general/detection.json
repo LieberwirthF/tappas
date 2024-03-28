@@ -7,7 +7,7 @@
       "destination": "yolov8m.hef"
     },
     {
-      "bucket": "tappas",
+      "bucket": "model_zoo",
       "source": "general/hefs/yolov5m_wo_spp_60p.hef",
       "destination": "yolov5m_wo_spp_60p.hef"
     },

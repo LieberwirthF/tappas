@@ -26,7 +26,6 @@ static GstPadProbeReturn encoder_probe_callback(GstPad *pad, GstPadProbeInfo *in
         gpointer value = nullptr;
         g_object_get(G_OBJECT(encoder_element), "user-config", &value, NULL);
         encoder_config_t *config = reinterpret_cast<encoder_config_t *>(value);
-        hailo_encoder_config_t hailo_config = std::get<hailo_encoder_config_t>(*config);
         GST_INFO("Changing to low qp");
         hailo_config.rate_control.quantization.qp_min = 3;
         hailo_config.rate_control.quantization.qp_max = 10;
@@ -37,7 +36,6 @@ static GstPadProbeReturn encoder_probe_callback(GstPad *pad, GstPadProbeInfo *in
         gpointer value = nullptr;
         g_object_get(G_OBJECT(encoder_element), "user-config", &value, NULL);
         encoder_config_t *config = reinterpret_cast<encoder_config_t *>(value);
-        hailo_encoder_config_t hailo_config = std::get<hailo_encoder_config_t>(*config);
         GST_INFO("Changing to high qp");
         hailo_config.rate_control.quantization.qp_min = 43;
         hailo_config.rate_control.quantization.qp_max = 49;
@@ -48,7 +46,6 @@ static GstPadProbeReturn encoder_probe_callback(GstPad *pad, GstPadProbeInfo *in
         gpointer value = nullptr;
         g_object_get(G_OBJECT(encoder_element), "user-config", &value, NULL);
         encoder_config_t *config = reinterpret_cast<encoder_config_t *>(value);
-        hailo_encoder_config_t hailo_config = std::get<hailo_encoder_config_t>(*config);
         GST_INFO("Changing to variant qp");
         hailo_config.rate_control.quantization.qp_min = 0;
         hailo_config.rate_control.quantization.qp_max = 51;
@@ -90,7 +87,7 @@ std::string create_pipeline_string(std::string codec)
                "queue leaky=no max-size-buffers=5 max-size-bytes=0 max-size-time=0 ! "
                "video/x-" + codec + ",framerate=30/1 ! "
                "queue leaky=no max-size-buffers=5 max-size-bytes=0 max-size-time=0 ! "
-               "fpsdisplaysink fps-update-interval=2000 name=display_sink text-overlay=false video-sink=\"filesink location=test."
+               "fpsdisplaysink name=display_sink text-overlay=false video-sink=\"filesink location=test."
                + output_format + " name=hailo_sink\""
                " sync=true signal-fps-measurements=true";
 

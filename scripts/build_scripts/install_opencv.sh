@@ -45,9 +45,4 @@ function main() {
     popd
 }
 
-function main() {
-    sudo apt-get install -y unzip
-    sudo apt-get install -y libopencv-dev python3-opencv
-}
-
 main

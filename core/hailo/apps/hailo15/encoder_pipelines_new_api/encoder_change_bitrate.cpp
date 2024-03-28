@@ -35,24 +35,23 @@ static GstPadProbeReturn encoder_probe_callback(GstPad *pad, GstPadProbeInfo *in
         gpointer value = nullptr;
         g_object_get(G_OBJECT(encoder_element), "user-config", &value, NULL);
         encoder_config_t *config = reinterpret_cast<encoder_config_t *>(value);
-        hailo_encoder_config_t hailo_config = std::get<hailo_encoder_config_t>(*config);
 
         if (counter % 400 != 0) {
 	        // Changing to VBR
             GST_INFO("Changing encoder to VBR");
-            hailo_config.rate_control.picture_rc = PICTURE_RC_OFF;
-            hailo_config.rate_control.ctb_rc = true;
-            hailo_config.rate_control.bitrate.target_bitrate = BITRATE_FOR_VBR;
-            hailo_config.rate_control.bitrate.tolerance_moving_bitrate = TOL_MOVING_BITRATE_FOR_VBR;
+            config->rate_control.picture_rc = PICTURE_RC_OFF;
+            config->rate_control.ctb_rc = true;
+            config->rate_control.bitrate.target_bitrate = BITRATE_FOR_VBR;
+            config->rate_control.bitrate.tolerance_moving_bitrate = TOL_MOVING_BITRATE_FOR_VBR;
         }
         else
         {
             // Changing to CBR
             GST_INFO("Changing encoder to CBR");
-            hailo_config.rate_control.picture_rc = PICTURE_RC_ON;
-            hailo_config.rate_control.ctb_rc = true;
-            hailo_config.rate_control.bitrate.target_bitrate = BITRATE_FOR_CBR;
-            hailo_config.rate_control.bitrate.tolerance_moving_bitrate = TOL_MOVING_BITRATE_FOR_CBR;
+            config->rate_control.picture_rc = PICTURE_RC_ON;
+            config->rate_control.ctb_rc = true;
+            config->rate_control.bitrate.target_bitrate = BITRATE_FOR_CBR;
+            config->rate_control.bitrate.tolerance_moving_bitrate = TOL_MOVING_BITRATE_FOR_CBR;
         }
         g_object_set(G_OBJECT(encoder_element), "user-config", config, NULL);
     }
@@ -91,7 +90,7 @@ std::string create_pipeline_string(std::string codec)
                "queue leaky=no max-size-buffers=5 max-size-bytes=0 max-size-time=0 ! "
                "video/x-" + codec + ",framerate=30/1 ! "
                "queue leaky=no max-size-buffers=5 max-size-bytes=0 max-size-time=0 ! "
-               "fpsdisplaysink fps-update-interval=2000 name=display_sink text-overlay=false video-sink=\"filesink location=test."
+               "fpsdisplaysink name=display_sink text-overlay=false video-sink=\"filesink location=test."
                + output_format + " name=hailo_sink\""
                " sync=true signal-fps-measurements=true";
 
