@@ -172,33 +172,7 @@ void yolox(HailoROIPtr roi)
 
 void yolov5m_vehicles(HailoROIPtr roi)
 {
-    if (!roi->has_tensors())
-    {
-        return;
-    }
     auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV5M_VEHICLES_OUTPUT_LAYER), yolo_vehicles_labels);
-    auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
-    hailo_common::add_detections(roi, detections);
-}
-
-void yolov5m_vehicles_nv12(HailoROIPtr roi)
-{
-    if (!roi->has_tensors())
-    {
-        return;
-    }
-    auto post = HailoNMSDecode(roi->get_tensor("yolov5m_vehicles_nv12/yolov5_nms_postprocess"), yolo_vehicles_labels);
-    auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
-    hailo_common::add_detections(roi, detections);
-}
-
-void yolov5s_personface(HailoROIPtr roi)
-{
-    if (!roi->has_tensors())
-    {
-        return;
-    }
-    auto post = HailoNMSDecode(roi->get_tensor("yolov5s_personface_nv12/yolov5_nms_postprocess"), common::yolo_personface);
     auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
     hailo_common::add_detections(roi, detections);
 }
