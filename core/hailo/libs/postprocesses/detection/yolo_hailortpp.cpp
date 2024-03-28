@@ -136,18 +136,6 @@ void yolov5s_nv12(HailoROIPtr roi)
     hailo_common::add_detections(roi, detections);
 }
 
-void yolov5m(HailoROIPtr roi)
-{
-    if (!roi->has_tensors())
-    {
-        return;
-    }
-
-    auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV5M_OUTPUT_LAYER), common::coco_eighty);
-    auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
-    hailo_common::add_detections(roi, detections);
-}
-
 void yolov8s(HailoROIPtr roi)
 {
     if (!roi->has_tensors())
@@ -282,6 +270,7 @@ void filter(HailoROIPtr roi, void *params_void_ptr)
         }
     }
 }
+
 void filter_letterbox(HailoROIPtr roi, void *params_void_ptr)
 {
     filter(roi, params_void_ptr);
