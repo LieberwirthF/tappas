@@ -29,7 +29,7 @@ YoloParamsNMS *init(const std::string config_path, const std::string function_na
 void free_resources(void *params_void_ptr);
 void filter(HailoROIPtr roi, void *params_void_ptr);
 void yolov5(HailoROIPtr roi);
-void yolov5m(HailoROIPtr roi);
+void yolov5s_nv12(HailoROIPtr roi);
 void yolov8s(HailoROIPtr roi);
 void yolov8m(HailoROIPtr roi);
 void yolox(HailoROIPtr roi);
