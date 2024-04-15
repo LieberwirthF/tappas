@@ -103,7 +103,7 @@
         "enabled": false,
         "sensor": "imx678",
         "method": "HIGH_QUALITY",
-        "loopback-count": 3,
+        "loopback-count": 1,
         "network": {
             "network_path": "/usr/lib/medialib/denoise_config/vd_m_imx678.hef",
             "y_channel": "model/input_layer1",
