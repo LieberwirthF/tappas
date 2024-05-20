@@ -26,6 +26,7 @@ static GstPadProbeReturn encoder_probe_callback(GstPad *pad, GstPadProbeInfo *in
         gpointer value = nullptr;
         g_object_get(G_OBJECT(encoder_element), "user-config", &value, NULL);
         encoder_config_t *config = reinterpret_cast<encoder_config_t *>(value);
+        hailo_encoder_config_t hailo_config = std::get<hailo_encoder_config_t>(*config);
         GST_INFO("Changing to low qp");
         hailo_config.rate_control.quantization.qp_min = 3;
         hailo_config.rate_control.quantization.qp_max = 10;
@@ -36,6 +37,7 @@ static GstPadProbeReturn encoder_probe_callback(GstPad *pad, GstPadProbeInfo *in
         gpointer value = nullptr;
         g_object_get(G_OBJECT(encoder_element), "user-config", &value, NULL);
         encoder_config_t *config = reinterpret_cast<encoder_config_t *>(value);
+        hailo_encoder_config_t hailo_config = std::get<hailo_encoder_config_t>(*config);
         GST_INFO("Changing to high qp");
         hailo_config.rate_control.quantization.qp_min = 43;
         hailo_config.rate_control.quantization.qp_max = 49;
@@ -46,6 +48,7 @@ static GstPadProbeReturn encoder_probe_callback(GstPad *pad, GstPadProbeInfo *in
         gpointer value = nullptr;
         g_object_get(G_OBJECT(encoder_element), "user-config", &value, NULL);
         encoder_config_t *config = reinterpret_cast<encoder_config_t *>(value);
+        hailo_encoder_config_t hailo_config = std::get<hailo_encoder_config_t>(*config);
         GST_INFO("Changing to variant qp");
         hailo_config.rate_control.quantization.qp_min = 0;
         hailo_config.rate_control.quantization.qp_max = 51;
