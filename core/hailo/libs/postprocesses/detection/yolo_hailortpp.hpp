@@ -27,8 +27,12 @@ public:
 YoloV7Params *init(std::string config_path, std::string func_name);
 void free_resources(void *params_void_ptr);
 
-void filter(HailoROIPtr roi, void *params_void_ptr);
-void yolov5(HailoROIPtr roi, void *params_void_ptr);
+void yolov7(HailoROIPtr roi, void *params_void_ptr);
+void filter(HailoROIPtr roi);
+void yolov5(HailoROIPtr roi);
+void yolov5m(HailoROIPtr roi);
+void yolov8s(HailoROIPtr roi);
+void yolov8m(HailoROIPtr roi);
 void yolox(HailoROIPtr roi);
 void yolov5_no_persons(HailoROIPtr roi);
 void yolov5m_vehicles(HailoROIPtr roi);

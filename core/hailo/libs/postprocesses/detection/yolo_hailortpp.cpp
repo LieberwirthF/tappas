@@ -17,17 +17,65 @@ namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
 
-static const std::string DEFAULT_YOLOV5M_OUTPUT_LAYER = "yolov5_nms_postprocess";
+static const std::string DEFAULT_YOLOV5_OUTPUT_LAYER = "yolov5_nms_postprocess";
+static const std::string DEFAULT_YOLOV5M_OUTPUT_LAYER = "yolov5m_wo_spp_60p/yolov5_nms_postprocess";
+static const std::string DEFAULT_YOLOV8S_OUTPUT_LAYER = "yolov8s/yolov8_nms_postprocess";
+static const std::string DEFAULT_YOLOV8M_OUTPUT_LAYER = "yolov8m/yolov8_nms_postprocess";
 
 static std::map<uint8_t, std::string> yolo_vehicles_labels = {
     {0, "unlabeled"},
     {1, "car"}};
 
-void yolov5(HailoROIPtr roi, void *params_void_ptr)
+void yolov7(HailoROIPtr roi, void *params_void_ptr)
 {
     YoloV7Params *params = reinterpret_cast<YoloV7Params *>(params_void_ptr);
 
     auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV5M_OUTPUT_LAYER), params->labels);
+
+    auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
+    hailo_common::add_detections(roi, detections);
+}
+
+void yolov5(HailoROIPtr roi)
+{
+    if (!roi->has_tensors())
+    {
+        return;
+    }
+    auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV5_OUTPUT_LAYER), common::coco_eighty);
+    auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
+    hailo_common::add_detections(roi, detections);
+}
+
+void yolov5m(HailoROIPtr roi)
+{
+    if (!roi->has_tensors())
+    {
+        return;
+    }
+    auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV5M_OUTPUT_LAYER), common::coco_eighty);
+    auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
+    hailo_common::add_detections(roi, detections);
+}
+
+void yolov8s(HailoROIPtr roi)
+{
+    if (!roi->has_tensors())
+    {
+        return;
+    }
+    auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV8S_OUTPUT_LAYER), common::coco_eighty);
+    auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
+    hailo_common::add_detections(roi, detections);
+}
+
+void yolov8m(HailoROIPtr roi)
+{
+    if (!roi->has_tensors())
+    {
+        return;
+    }
+    auto post = HailoNMSDecode(roi->get_tensor(DEFAULT_YOLOV8M_OUTPUT_LAYER), common::coco_eighty);
     auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
     hailo_common::add_detections(roi, detections);
 }
@@ -65,10 +113,9 @@ void yolov5_no_persons(HailoROIPtr roi)
     hailo_common::add_detections(roi, detections);
 }
 
-void filter(HailoROIPtr roi, void *params_void_ptr)
+void filter(HailoROIPtr roi)
 {
-    YoloV7Params *params = reinterpret_cast<YoloV7Params *>(params_void_ptr);
-    yolov5(roi, params);
+    yolov5(roi);
 }
 
 YoloV7Params *init(const std::string config_path, const std::string function_name)
