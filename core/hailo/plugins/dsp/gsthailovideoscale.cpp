@@ -3,7 +3,6 @@
 #include "gst_hailo_meta.hpp"
 #include "hailo_objects.hpp"
 #include "media_library/buffer_pool.hpp"
-#include "gsthailodsp.h"
 #include <gst/gst.h>
 #include <gst/video/video.h>
 
@@ -103,7 +102,7 @@ gst_hailo_videoscale_get_property(GObject *object, guint prop_id, GValue *value,
 
 static gboolean gst_hailo_videoscale_start(GstBaseTransform *base_transform)
 {
-    auto status = acquire_device();
+    auto status = dsp_utils::acquire_device();
     if (status != DSP_SUCCESS)
     {
         GST_ERROR_OBJECT(base_transform, "Failed to acquire device. return status: %d", status);
@@ -115,7 +114,7 @@ static gboolean gst_hailo_videoscale_start(GstBaseTransform *base_transform)
 
 static gboolean gst_hailo_videoscale_stop(GstBaseTransform *base_transform)
 {
-    auto staus = release_device();
+    auto staus = dsp_utils::release_device();
 
     if (staus != DSP_SUCCESS)
     {
