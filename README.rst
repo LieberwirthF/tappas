@@ -7,7 +7,7 @@ Hailo TAPPAS - Optimized Execution of Video-Processing Pipelines
    :width: 150
    :height: 20
 
-.. |hailort| image:: https://img.shields.io/badge/HailoRT-4.17.0-green
+.. |hailort| image:: https://img.shields.io/badge/HailoRT-4.18.0-green
    :target: https://github.com/hailo-ai/hailort
    :alt: HailoRT
    :height: 20
@@ -68,7 +68,7 @@ Prerequisites
 
 
 .. note::
-    This version is compatible with HailoRT v4.17.
+    This version is compatible with HailoRT v4.18.
 
 
 Installation
@@ -350,6 +350,29 @@ The pipeline demonstrates another method for inference based decision making tha
 
 Changelog
 ----------
+
+**v3.29.0 (July 2024)**
+
+* Hailo-15:
+
+  * Updated all Hailo-15 example applications to use the latest API
+  * Added a new C++ based example application that demonstrates the use of the
+    Hailo-15 API `Link <core/hailo/apps/hailo15/ai_example_app/README.rst>`_
+  * This release is aligned with the Hailo-15 Vision Processor Software Package 2024-07
+
+* Hailo-8:
+
+  * Added a new example application which demonstrates x86 hardware-accelerated
+    `multi-stream detection <apps/h8/gstreamer/x86_hw_accelerated/multistream_detection/README.rst>`_
+  * Various bug fixes and stability improvements for `Raspberry Pi 5 <https://github.com/hailo-ai/hailo-rpi5-examples>`_
+
+* Fixed various stability issues across apps and platforms
+
+**v3.28.1 (May 2024)**
+
+* Added a new property to ``hailomuxer`` which allows the sub-frame to be leaky
+* ``hailooverlay`` now properly supports Hailo-15 with a new DMABuf sync mechanism
+* ``hailovideoscale`` (Hailo-15 Element) now supports the ``letterbox`` property
 
 **v3.28.0 (April 2024)**
 
