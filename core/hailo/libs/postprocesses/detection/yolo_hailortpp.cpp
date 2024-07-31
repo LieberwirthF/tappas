@@ -1,14 +1,17 @@
 #include <regex>
+#include <fstream>
+#include <sstream>
+#include <map>
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/error/en.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/schema.h"
 #include "json_config.hpp"
-#include "hailo_nms_decode.hpp"
-#include "yolo_hailortpp.hpp"
 #include "common/labels/coco_eighty.hpp"
 #include "common/labels/yolo_personface.hpp"
+#include "hailo_nms_decode.hpp"
+#include "yolo_hailortpp.hpp"
 
 static const std::string DEFAULT_YOLOV5S_OUTPUT_LAYER = "yolov5s_nv12/yolov5_nms_postprocess";
 static const std::string DEFAULT_YOLOV5M_OUTPUT_LAYER = "yolov5m_wo_spp_60p/yolov5_nms_postprocess";
@@ -252,4 +255,27 @@ void yolov7tiny(HailoROIPtr roi, void *params_void_ptr)
 void filter(HailoROIPtr roi, void *params_void_ptr)
 {
     yolov7tiny(roi, params_void_ptr);
+}
+
+void filter_letterbox(HailoROIPtr roi, void *params_void_ptr)
+{
+    filter(roi, params_void_ptr);
+    // Resize Letterbox
+    HailoBBox roi_bbox = hailo_common::create_flattened_bbox(roi->get_bbox(), roi->get_scaling_bbox());
+    auto detections = hailo_common::get_hailo_detections(roi);
+    for (auto &detection : detections)
+    {
+        auto detection_bbox = detection->get_bbox();
+        auto xmin = (detection_bbox.xmin() * roi_bbox.width()) + roi_bbox.xmin();
+        auto ymin = (detection_bbox.ymin() * roi_bbox.height()) + roi_bbox.ymin();
+        auto xmax = (detection_bbox.xmax() * roi_bbox.width()) + roi_bbox.xmin();
+        auto ymax = (detection_bbox.ymax() * roi_bbox.height()) + roi_bbox.ymin();
+
+        HailoBBox new_bbox(xmin, ymin, xmax - xmin, ymax - ymin);
+        detection->set_bbox(new_bbox);
+    }
+
+    // Clear the scaling bbox of main roi because all detections are fixed.
+    roi->clear_scaling_bbox();
+
 }

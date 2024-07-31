@@ -6,7 +6,6 @@
 #include "hailo_objects.hpp"
 #include "hailo_common.hpp"
 
-
 __BEGIN_DECLS
 
 class YoloParamsNMS
@@ -28,6 +27,7 @@ public:
 YoloParamsNMS *init(const std::string config_path, const std::string function_name);
 void free_resources(void *params_void_ptr);
 void filter(HailoROIPtr roi, void *params_void_ptr);
+void filter_letterbox(HailoROIPtr roi, void *params_void_ptr);
 void yolov5(HailoROIPtr roi);
 void yolov5s_nv12(HailoROIPtr roi);
 void yolov8s(HailoROIPtr roi);
