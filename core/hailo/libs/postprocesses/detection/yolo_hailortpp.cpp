@@ -104,6 +104,7 @@ YoloParamsNMS *init(const std::string config_path, const std::string function_na
     }
     return params;
 }
+
 void free_resources(void *params_void_ptr)
 {
     YoloParamsNMS *params = reinterpret_cast<YoloParamsNMS *>(params_void_ptr);
