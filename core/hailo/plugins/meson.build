@@ -50,6 +50,7 @@ dl_dep = meson.get_compiler('c').find_library('dl', required : false)
 zmq_dep = dependency('libzmq', method : 'pkg-config')
 gsthailotools_deps = plugin_deps + [meta_dep, dl_dep, opencv_dep, tracker_dep, zmq_dep]
 if get_option('target_platform') == 'hailo15'
+    medialibrary_dep = dependency('hailo_media_library_common', method : 'pkg-config', required:true)
     gstmedialibrary_utils_dep = dependency('gstmedialibutils', method : 'pkg-config', required:false)
     dsp_dep = meson.get_compiler('c').find_library('libhailodsp', required: true, dirs: sysroot + '/usr/lib/')
     
@@ -58,13 +59,11 @@ if get_option('target_platform') == 'hailo15'
         'dsp/gsthailovideoscale.cpp'
     ]
 
-    gsthailotools_deps += [dsp_dep, gstmedialibrary_utils_dep]
+    gsthailotools_deps += [dsp_dep, gstmedialibrary_utils_dep, medialibrary_dep]
     common_args += ['-DHAILO15_TARGET']
     hailo_link_args += sysroot_arg
 elif get_option('target_platform') == 'imx8' 
     common_args += ['-DIMX8_TARGET']
-elif get_option('target_platform') == 'imx6'
-    common_args += ['-DIMX6_TARGET']
 endif
 
 ################################################
@@ -82,6 +81,7 @@ shared_library('gsthailotools',
     install: true,
     install_dir: get_option('libdir') + '/gstreamer-1.0/',
 )
+
 
 if not get_option('include_python')
     subdir_done()
@@ -117,8 +117,8 @@ hailo_python_sources = [
 
 python_installation.extension_module('hailo',
     hailo_python_sources,
-    include_directories: hailo_general_inc,
-    dependencies : [pybind_dep],
+    include_directories: [hailo_general_inc],
+    dependencies : [pybind_dep, meta_dep, plugin_deps, pygobj_dep],
     link_language : 'cpp',
     override_options: ['cpp_rtti=true'],
     gnu_symbol_visibility : 'default',

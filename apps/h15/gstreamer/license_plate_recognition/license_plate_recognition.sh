@@ -11,16 +11,15 @@ function init_variables() {
     readonly CROPPING_ALGORITHMS_DIR="$POSTPROCESS_DIR/cropping_algorithms"
     readonly RESOURCES_DIR="${CURRENT_DIR}/resources"
     readonly DEFAULT_LICENSE_PLATE_JSON_CONFIG_PATH="$RESOURCES_DIR/configs/yolov4_license_plate.json"
-    readonly DEFAULT_VEHICLE_JSON_CONFIG_PATH="$RESOURCES_DIR/configs/yolov5_vehicle_detection.json" 
+    readonly DEFAULT_ENCODER_CONFIG_PATH="$RESOURCES_DIR/configs/encoder_config.json"
 
     # Default Video
     readonly DEFAULT_VIDEO_SOURCE="$RESOURCES_DIR/lpr_nv12.raw"
 
     # Vehicle Detection Macros
     readonly VEHICLE_DETECTION_HEF="$RESOURCES_DIR/yolov5m_vehicles_nv12.hef"
-    readonly VEHICLE_DETECTION_POST_SO="$POSTPROCESS_DIR/libyolo_post.so"
-    readonly VEHICLE_DETECTION_POST_FUNC="yolov5_vehicles_only"
-
+    readonly VEHICLE_DETECTION_POST_SO="$POSTPROCESS_DIR/libyolo_hailortpp_post.so"
+    readonly VEHICLE_DETECTION_POST_FUNC="yolov5m_vehicles_nv12"
 
     # License Plate Detection Macros
     readonly LICENSE_PLATE_DETECTION_HEF="$RESOURCES_DIR/tiny_yolov4_license_plates_nv12.hef"
@@ -30,6 +29,7 @@ function init_variables() {
     # License Plate OCR Macros
     readonly LICENSE_PLATE_OCR_HEF="$RESOURCES_DIR/lprnet_nv12.hef"
     readonly LICENSE_PLATE_OCR_POST_SO="$POSTPROCESS_DIR/libocr_post.so"
+    readonly LICENSE_PLATE_OCR_POST_FUNC="lprnet_nv12"
 
     # Cropping Algorithm Macros
     readonly LICENSE_PLATE_CROP_SO="$CROPPING_ALGORITHMS_DIR/liblpr_croppers.so"
@@ -47,6 +47,7 @@ function init_variables() {
     udp_port=$DEFAULT_UDP_PORT
     udp_host_ip=$DEFAULT_UDP_HOST_IP
 
+    encoder_config_path=$DEFAULT_ENCODER_CONFIG_PATH
     print_gst_launch_only=false
     additional_parameters=""
     stats_element=""
@@ -57,7 +58,6 @@ function init_variables() {
     internal_offset=false
     pipeline_1=""
     license_plate_json_config_path=$DEFAULT_LICENSE_PLATE_JSON_CONFIG_PATH
-    car_json_config_path=$DEFAULT_VEHICLE_JSON_CONFIG_PATH 
 }
 
 function print_help_if_needed() {
@@ -71,7 +71,7 @@ function print_help_if_needed() {
 }
 
 function print_usage() {
-    echo "IMX8 LPR pipeline usage:"
+    echo "Hailo15 LPR pipeline usage:"
     echo ""
     echo "Options:"
     echo "  -h --help                  Show this help"
@@ -130,9 +130,9 @@ function create_lp_detection_pipeline() {
                 agg2. \
                 cropper2. ! \
                     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
-	            hailonet hef-path=$LICENSE_PLATE_OCR_HEF vdevice-key=1 scheduling-algorithm=1 ! \
+	                hailonet hef-path=$LICENSE_PLATE_OCR_HEF vdevice-key=1 scheduling-algorithm=1 ! \
                     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
-                    hailofilter so-path=$LICENSE_PLATE_OCR_POST_SO qos=false ! \
+                    hailofilter so-path=$LICENSE_PLATE_OCR_POST_SO function-name=$LICENSE_PLATE_OCR_POST_FUNC qos=false ! \
                     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
                 agg2. \
                 agg2. ! queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0"
@@ -145,9 +145,9 @@ UDP_SINK="udpsink host=$udp_host_ip port=$udp_port"
 PIPELINE="${debug_stats_export} gst-launch-1.0 ${stats_element} \
     $source_element ! \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
-    hailonet batch-size=4 hef-path=$VEHICLE_DETECTION_HEF vdevice-key=1 scheduling-algorithm=1 ! \
+    hailonet batch-size=4 hef-path=$VEHICLE_DETECTION_HEF vdevice-key=1 scheduling-algorithm=1 nms-iou-threshold=0.45 nms-score-threshold=0.3 nms-max-proposals-per-class=200 ! \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
-    hailofilter so-path=$VEHICLE_DETECTION_POST_SO config-path=$car_json_config_path function-name=$VEHICLE_DETECTION_POST_FUNC qos=false ! \
+    hailofilter so-path=$VEHICLE_DETECTION_POST_SO function-name=$VEHICLE_DETECTION_POST_FUNC qos=false ! \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
     hailotracker name=hailo_tracker keep-past-metadata=true kalman-dist-thr=.5 iou-thr=.6 keep-tracked-frames=2 keep-lost-frames=2 ! \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
@@ -160,16 +160,17 @@ PIPELINE="${debug_stats_export} gst-launch-1.0 ${stats_element} \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
     hailoupload pool-size=16 ! \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
-    hailoh264enc ! h264parse config-interval=-1 ! \
+    video/x-raw, framerate=25/1 ! \
+    hailoencodebin config-file-path=$encoder_config_path ! h264parse config-interval=-1 ! \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
     tee name=udp_tee \
     udp_tee. ! \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
     rtph264pay ! 'application/x-rtp, media=(string)video, encoding-name=(string)H264' ! \
-    fpsdisplaysink video-sink='$UDP_SINK' name=udp_sink sync=$sync_pipeline text-overlay=false \
+    fpsdisplaysink fps-update-interval=2000 video-sink='$UDP_SINK' name=udp_sink sync=$sync_pipeline text-overlay=false \
     udp_tee. ! \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
-    fpsdisplaysink video-sink=fakesink name=hailo_display sync=$sync_pipeline text-overlay=false \
+    fpsdisplaysink fps-update-interval=2000 video-sink=fakesink name=hailo_display sync=$sync_pipeline text-overlay=false \
     $tee_name. ! \
     $pipeline_1 ! \
     hailofilter use-gst-buffer=true so-path=$LPR_OCR_SINK qos=false ! \

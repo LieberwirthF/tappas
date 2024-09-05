@@ -141,14 +141,14 @@ function create_lp_detection_pipeline() {
 }
 create_lp_detection_pipeline $@
 
-FPS_SINK="fpsdisplaysink video-sink=fakesink name=hailo_display sync=$sync_pipeline text-overlay=false"
+FPS_SINK="fpsdisplaysink fps-update-interval=2000 video-sink=fakesink name=hailo_display sync=$sync_pipeline text-overlay=false"
 
 UDPSINK="videoconvert qos=false ! video/x-raw, format=I420 ! \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
     videoscale ! video/x-raw, width=300, height=300 ! \
     queue leaky=no max-size-buffers=30 max-size-bytes=0 max-size-time=0 ! \
     rtpvrawpay ! 'application/x-rtp, media=(string)video, encoding-name=(string)RAW' ! \
-    fpsdisplaysink video-sink='udpsink host=10.0.0.2 port=5000' name=hailo_display sync=$sync_pipeline text-overlay=false"
+    fpsdisplaysink fps-update-interval=2000 video-sink='udpsink host=10.0.0.2 port=5000' name=hailo_display sync=$sync_pipeline text-overlay=false"
 
 PIPELINE="${debug_stats_export} gst-launch-1.0 ${stats_element} \
     $source_element ! \

@@ -168,7 +168,7 @@ function create_lp_detection_pipeline() {
 }
 create_lp_detection_pipeline $@
 
-FPS_DISP="fpsdisplaysink name=hailo_display sync=true video-sink=fakesink text-overlay=false"
+FPS_DISP="fpsdisplaysink fps-update-interval=2000 name=hailo_display sync=true video-sink=fakesink text-overlay=false"
 
 PIPELINE="${debug_stats_export} gst-launch-1.0 ${stats_element} \
     $source_element ! \
