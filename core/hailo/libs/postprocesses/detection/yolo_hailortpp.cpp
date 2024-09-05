@@ -18,6 +18,7 @@ static const std::string DEFAULT_YOLOV5M_OUTPUT_LAYER = "yolov5m_wo_spp_60p/yolo
 static const std::string DEFAULT_YOLOV5M_VEHICLES_OUTPUT_LAYER = "yolov5m_vehicles/yolov5_nms_postprocess";
 static const std::string DEFAULT_YOLOV8S_OUTPUT_LAYER = "yolov8s/yolov8_nms_postprocess";
 static const std::string DEFAULT_YOLOV8M_OUTPUT_LAYER = "yolov8m/yolov8_nms_postprocess";
+static const std::string DEFAULT_YOLOV7TINY_OUTPUT_LAYER = "yolov7_tiny/yolov5_nms_postprocess";
 
 #if __GNUC__ > 8
 #include <filesystem>
@@ -56,6 +57,9 @@ YoloParamsNMS *init(const std::string config_path, const std::string function_na
             "items": {
                 "type": "string"
                 }
+            },
+            "output_layer_name": {
+            "type": "string"
             }
         },
         "required": [
@@ -92,6 +96,9 @@ YoloParamsNMS *init(const std::string config_path, const std::string function_na
                 params->max_boxes = doc_config_json["max_boxes"].GetInt();
                 params->filter_by_score = true;
             }
+            if (doc_config_json.HasMember("output_layer_name")) {
+                params->output_layer_name = doc_config_json["output_layer_name"].GetString();
+            }
         }
         fclose(fp);
     }
@@ -107,7 +114,7 @@ static std::map<uint8_t, std::string> yolo_vehicles_labels = {
     {0, "unlabeled"},
     {1, "car"}};
 
-void yolov5(HailoROIPtr roi, void *params_void_ptr)
+void yolov5(HailoROIPtr roi)
 {
     if (!roi->has_tensors())
     {
@@ -216,6 +223,34 @@ void yolov5_no_persons(HailoROIPtr roi)
     }
     hailo_common::add_detections(roi, detections);
 }
+
+void yolov7tiny(HailoROIPtr roi, void *params_void_ptr)
+{
+    if (!roi->has_tensors())
+    {
+        return;
+    }
+    YoloParamsNMS *params = reinterpret_cast<YoloParamsNMS *>(params_void_ptr);
+    std::vector<HailoTensorPtr> tensors = roi->get_tensors();
+    // find the nms tensor
+    for (auto tensor : tensors)
+    {
+        if (std::regex_search(tensor->name(), std::regex("nms_postprocess"))) 
+        {
+            std::string output_layer_name;
+            if (params->output_layer_name.empty()){
+                output_layer_name = DEFAULT_YOLOV7TINY_OUTPUT_LAYER;
+            } else {
+                output_layer_name = params->output_layer_name;
+            }
+
+            auto post = HailoNMSDecode(roi->get_tensor(output_layer_name), params->labels, params->detection_threshold, params->max_boxes, params->filter_by_score);
+            auto detections = post.decode<float32_t, common::hailo_bbox_float32_t>();
+            hailo_common::add_detections(roi, detections);
+        }
+    }
+}
+
 void filter(HailoROIPtr roi, void *params_void_ptr)
 {
     if (!roi->has_tensors())

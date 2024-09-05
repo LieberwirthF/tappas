@@ -119,6 +119,7 @@ public:
     Yolov5(HailoROIPtr roi, YoloParams *params)
         : YoloPost(params->labels, params->detection_threshold, params->iou_threshold, params->max_boxes), _tensors(roi->get_tensors())
     {
+
         if (_tensors.size() > 0)
         {
             bool sigmoid = (params->output_activation == "sigmoid");
@@ -134,7 +135,6 @@ public:
                 hailo_format_type_t format = _tensors[i]->vstream_info().format.type;
                 _layers.push_back(std::make_shared<Yolov5OL>(_tensors[i], params->anchors_vec[i], sigmoid, params->label_offset, format == HAILO_FORMAT_TYPE_UINT16));
             }
-
             params->check_params_logic(get_num_classes());
         }
     };

@@ -65,7 +65,7 @@
             }
         ]
     },
-    "encoding" : {
+    "encoding": {
         "input_stream": {
             "width": 640,
             "height": 480,

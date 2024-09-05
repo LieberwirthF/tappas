@@ -1,13 +1,10 @@
 {
     "osd": {
-        "image": [
-        ],
-        "dateTime": [
-        ],
-        "text": [
-        ]
+        "image": [],
+        "dateTime": [],
+        "text": []
     },
-    "encoding" : {
+    "encoding": {
         "input_stream": {
             "width": 720,
             "height": 480,

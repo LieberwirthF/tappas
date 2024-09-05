@@ -15,6 +15,7 @@ public:
     float detection_threshold;
     uint max_boxes;
     bool filter_by_score=false;
+    std::string output_layer_name;
     YoloParamsNMS(std::map<uint8_t, std::string> dataset = std::map<uint8_t, std::string>(),
                   float detection_threshold = 0.3f,
                   uint max_boxes = 200)
@@ -29,6 +30,7 @@ void filter(HailoROIPtr roi, void *params_void_ptr);
 void filter_letterbox(HailoROIPtr roi, void *params_void_ptr);
 void yolov5(HailoROIPtr roi);
 void yolov5s_nv12(HailoROIPtr roi);
+void yolov7tiny(HailoROIPtr roi, void *params_void_ptr);
 void yolov8s(HailoROIPtr roi);
 void yolov8m(HailoROIPtr roi);
 void yolox(HailoROIPtr roi);

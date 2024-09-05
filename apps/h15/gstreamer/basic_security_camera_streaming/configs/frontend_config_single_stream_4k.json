@@ -62,8 +62,7 @@
         "iir_hpf_coefficient": 0.997,
         "camera_fov_factor": 1
     },
-    "gyro":
-    {
+    "gyro": {
         "enabled": false,
         "sensor_name": "lsm6dsr_gyro",
         "sensor_frequency": "833.000000",

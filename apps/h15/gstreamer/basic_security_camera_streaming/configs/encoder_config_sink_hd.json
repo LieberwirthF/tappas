@@ -1,5 +1,5 @@
 {
-    "osd":     {
+    "osd": {
         "image": [
             {
                 "id": "example_image1",
@@ -65,7 +65,7 @@
             }
         ]
     },
-    "encoding" : {
+    "encoding": {
         "input_stream": {
             "width": 1280,
             "height": 720,

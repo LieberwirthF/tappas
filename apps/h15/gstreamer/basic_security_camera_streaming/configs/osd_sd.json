@@ -1,6 +1,5 @@
 {
-    "osd":
-    {
+    "osd": {
         "image": [
             {
                 "id": "example_image1",
