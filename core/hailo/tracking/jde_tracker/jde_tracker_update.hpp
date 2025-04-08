@@ -97,7 +97,7 @@ inline void JDETracker::update_matches(std::vector<std::pair<int, int>> matches,
             track->re_activate(*det, this->m_frame_id, false, this->m_keep_past_metadata);
             break;
         case TrackState::New: // The tracklet is brand new, so activate
-            track->activate(&this->m_kalman_filter, this->m_frame_id);
+            track->activate(*det, &this->m_kalman_filter, this->m_frame_id);
             break;
         }
         activated_stracks.push_back(*track);
@@ -201,7 +201,7 @@ inline void JDETracker::update_unmatches(std::vector<STrack *> strack_pool,
  * @return std::vector<STrack>
  *         The currently tracked (and unconfirmed if report_unconfirmed) objects.
  */
-inline std::vector<STrack> JDETracker::update(std::vector<HailoDetectionPtr> &inputs, bool report_unconfirmed = false, bool report_lost = false)
+inline std::vector<STrack> JDETracker::update(std::vector<HailoDetectionPtr> &inputs, bool report_unconfirmed = true, bool report_lost = false)
 {
     this->m_frame_id++;
     std::vector<STrack> detections;        // New detections in this update

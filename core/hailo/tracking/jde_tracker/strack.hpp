@@ -327,7 +327,7 @@ public:
      * @param frame_id  -  int
      *        The current frame it, this becomes the "starting" frame id.
      */
-    void activate(KalmanFilter *kalman_filter, int frame_id)
+    void activate(STrack &new_track, KalmanFilter *kalman_filter, int frame_id)
     {
         this->m_kalman_filter = kalman_filter;
         this->m_track_id = this->next_id();
@@ -335,6 +335,7 @@ public:
         HailoUniqueIDPtr object_id = std::make_shared<HailoUniqueID>(HailoUniqueID(this->m_track_id));
         this->m_hailo_detection->add_object(object_id);
 
+        this->tmp_location_tlwh = new_track.m_tlwh;
         TrackerTypes::DETECTBOX xyah_box = STrack::get_detectbox_from_tlwh(this->tmp_location_tlwh);
 
         auto mc = this->m_kalman_filter->initiate(xyah_box);
