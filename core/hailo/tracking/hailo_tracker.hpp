@@ -23,6 +23,7 @@
 #define DEFAULT_STD_WEIGHT_VELOCITY (0.001)
 #define DEFAULT_STD_WEIGHT_VELOCITY_BOX (0.00000001)
 #define DEFAULT_DEBUG (false)
+#define DEFAULT_REPORT_UNCONFIRMED_TRACKS (false)
 #define DEFAULT_HAILO_OBJECTS_BLACKLIST                     \
     {                                                       \
         HAILO_LANDMARKS, HAILO_DEPTH_MASK, HAILO_CLASS_MASK \
@@ -42,6 +43,7 @@ struct HailoTrackerParams
     float std_weight_velocity;
     float std_weight_velocity_box;
     bool debug;
+    bool report_unconfirmed_tracks;
     std::vector<hailo_object_t> hailo_objects_blacklist;
 };
 
@@ -62,7 +64,7 @@ public:
     void add_jde_tracker(const std::string &name);
     void remove_jde_tracker(const std::string &name);
     std::vector<std::string> get_trackers_list();
-    std::vector<HailoDetectionPtr> update(const std::string &name, std::vector<HailoDetectionPtr> &inputs);
+    std::vector<HailoDetectionPtr> update(const std::string &name, std::vector<HailoDetectionPtr> &inputs, bool report_unconfirmed);
     void add_object_to_track(const std::string &name, int id, HailoObjectPtr obj);
     void remove_classifications_from_track(const std::string &name, int track_id, std::string classifier_type);
     void remove_matrices_from_track(const std::string &name, int track_id);

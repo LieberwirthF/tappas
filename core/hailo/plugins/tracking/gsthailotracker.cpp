@@ -51,6 +51,7 @@ enum
     PROP_STD_WEIGHT_VELOCITY_BOX,
     PROP_DEBUG,
     PROP_HAILO_OBJECTS_BLACKLIST,
+    PROP_REPORT_UNCONFIRMED_TRACKS,
 };
 
 //******************************************************************
@@ -189,6 +190,11 @@ gst_hailo_tracker_class_init(GstHailoTrackerClass *klass)
                                     g_param_spec_string("hailo-objects-blacklist", "Hailo objects blacklist",
                                                         "list of hailo objects types that the tracker should not keep, comma separated", "hailo_landmarks,hailo_depth_mask,hailo_class_mask",
                                                         (GParamFlags)(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+    g_object_class_install_property(gobject_class, PROP_REPORT_UNCONFIRMED_TRACKS,
+                                    g_param_spec_boolean("report-unconfirmed-tracks", "report unconfirmed tracks",
+                                                         "If set show tracks even if they have no tracking id yet, e.g. first occurrence of an object.",
+                                                         DEFAULT_REPORT_UNCONFIRMED_TRACKS,
+                                                         (GParamFlags)(GST_PARAM_CONTROLLABLE | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
     // Set virtual functions
     gobject_class->dispose = gst_hailo_tracker_dispose;
     base_transform_class->stop = GST_DEBUG_FUNCPTR(gst_hailo_tracker_stop);
@@ -213,6 +219,7 @@ gst_hailo_tracker_init(GstHailoTracker *hailotracker)
     hailotracker->tracker_params.std_weight_velocity = DEFAULT_STD_WEIGHT_VELOCITY;
     hailotracker->tracker_params.std_weight_velocity_box = DEFAULT_STD_WEIGHT_VELOCITY_BOX;
     hailotracker->tracker_params.debug = DEFAULT_DEBUG;
+    hailotracker->tracker_params.report_unconfirmed_tracks = DEFAULT_REPORT_UNCONFIRMED_TRACKS;
     hailotracker->tracker_params.hailo_objects_blacklist = DEFAULT_HAILO_OBJECTS_BLACKLIST;
 }
 
@@ -365,6 +372,9 @@ void gst_hailo_tracker_set_property(GObject *object, guint property_id,
         break;
     }
 
+    case PROP_REPORT_UNCONFIRMED_TRACKS:
+        hailotracker->tracker_params.report_unconfirmed_tracks = g_value_get_boolean(value);
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
         break;
@@ -433,6 +443,9 @@ void gst_hailo_tracker_get_property(GObject *object, guint property_id,
         g_value_set_string(value, blacklist.c_str());
         break;
     }
+    case PROP_REPORT_UNCONFIRMED_TRACKS:
+        g_value_set_boolean(value, hailotracker->tracker_params.report_unconfirmed_tracks);
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
         break;
@@ -508,7 +521,7 @@ gst_hailo_tracker_transform_frame_ip(GstVideoFilter *filter, GstVideoFrame *fram
     // Swap the detections in the roi with just the online tracked detections
     GST_OBJECT_LOCK(hailotracker);
     std::string tracker_name = get_tracker_name(hailotracker, std::string(stream_id));
-    std::vector<HailoDetectionPtr> online_detection_ptrs = HailoTracker::GetInstance().update(tracker_name, detections);
+    std::vector<HailoDetectionPtr> online_detection_ptrs = HailoTracker::GetInstance().update(tracker_name, detections, hailotracker->tracker_params.report_unconfirmed_tracks);
 
     hailo_common::add_detection_pointers(hailo_roi, online_detection_ptrs);
     GST_OBJECT_UNLOCK(hailotracker);

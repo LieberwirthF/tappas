@@ -69,10 +69,10 @@ void HailoTracker::add_jde_tracker(const std::string &name)
     priv->trackers.emplace(name, JDETracker());
 }
 
-std::vector<HailoDetectionPtr> HailoTracker::update(const std::string &name, std::vector<HailoDetectionPtr> &inputs)
+std::vector<HailoDetectionPtr> HailoTracker::update(const std::string &name, std::vector<HailoDetectionPtr> &inputs, bool report_unconfirmed)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    auto online_stracks = priv->trackers[name].update(inputs);
+    auto online_stracks = priv->trackers[name].update(inputs, report_unconfirmed);
     bool debug = priv->trackers[name].get_debug();
     return JDETracker::stracks_to_hailo_detections(online_stracks, debug);
 }
